@@ -43,27 +43,13 @@ except ImportError:
 STATICFILES_DIRS = (
    BASE_DIR / 'static', # all generic static files are in /static
 )
-STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATIC_DEV_ROOT = BASE_DIR / 'static'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 ```
 
-4. Pour l'utilisation des *messages* de Django, il faut juste la configuration suivante:
-
-```python
-# Messages
-# https://docs.djangoproject.com/en/5.0/ref/contrib/messages/
-from django.contrib import messages
-MESSAGE_STORAGE = 'django.contrib.messages.storage.session.SessionStorage'
-MESSAGE_TAGS = {
-    messages.DEBUG: 'light',
-    messages.ERROR: 'danger',
-}
-```
-
-5. Et finalement, il faut donner un nom à l'application et un fichier pour le numéro de version. Créez un fichier nommé `version.txt` à la racine du projet et le code suivant dans le `settings.py`:
+3. Et finalement, il faut donner un nom à l'application et un fichier pour le numéro de version. Créez un fichier nommé `version.txt` à la racine du projet et le code suivant dans le `settings.py`:
 
 ```python
 # App information
@@ -76,100 +62,7 @@ with open(os.path.join(BASE_DIR, 'version.txt'), 'r') as version_file:
     APP_VERSION = version_file.read()
 ```
 
-## 3. Première app _base_
-
-Nous pouvons à présent créer la première application du projet. Par défaut, celle-ci s'appelera `base`.
-
-```python
-django-admin startapp base
-```
-
-Un nouveau dossier **base** a été crée dans votre dossier. Ce dossier contiendra les informations les plus généralisés possible (par exemple les classes Mère réutilisable dans les autres applications), ou encore les différents templates globaux.
-
-Il faut enregistrer cette app dans le `settings.py` dans le tableau **INSTALLED_APPS** et aussi ajouter les routes dans le urls.py dans `config`.
-
-Dans **INSTALLED_APPS**:
-
-```py
-INSTALLED_APPS = [
-    ...
-    'base',
-    'pcore',
-    'pauth',
-    'django.contrib.admin',
-]
-```
-
-Et dans le *urls.py*:
-
-```python
-urlpatterns= [
-    path('', include('base.urls')),
-    ...
-]
-```
-
-**Note**: Avec la commande *startapp*, le fichier `urls.py` de l'application créée ne se crée pas automatiquement.
-
-Le fichiers `views.py` devrait ressembler à ceci dans un premier temps:
-
-```python
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.shortcuts import reverse
-
-from django.http.response import HttpResponseRedirect
-from django.utils.translation import gettext_lazy as _
-from django.views import generic
-
-def index(request):
-    return HttpResponseRedirect(reverse('base:home'))
-
-class HomePageView(generic.TemplateView):
-    '''
-    Home page view, still to be defined the content inside
-    '''
-    template_name = 'base/home.html'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        return context
-```
-
-Le fichier `urls.py` doit être completé afin d'utiliser les différentes vues:
-
-```python
-from django.urls import path
-from . import views
-
-app_name = 'base'
-
-urlpatterns = [
-    path('', views.index, name='index'),
-    path('home/', views.HomePageView.as_view(), name='home'),
-]
-```
-
-**Note**: cette configuration a été inspirée par rapport à mon utilisation personnelle lors de l'initialisation d'un projet.
-
-# 4. Dossier static
-
-Le dossier `static`contiendra toutes les images, fichiers au format .css et .js et autres
-
-Ce dossier est créé manuellement avec un clic droit -> Nouveau dossier -> static.
-
-A l'intérieur de celui-ci, nous allons créer les dossiers suivants : **js, css, images, fonts, webfonts**:
-
-a) le dossier **js** contient tous les fichiers JavaScript nécessaires pour les applications. Par défaut nous utilisons des fichiers pour bootstrap, fontawesome, cookies et jquery
-
-b) le dossier **css** contient toutes les feuilles de style. Par défaut nous avons un fichier global pour l'application nommé `nom_app.css` et ensuite nous avons des fichiers pour bootstrap, les cookies, jquery, fontawesome
-
-c) le dossier **images** contient toutes les images utilisées dans l'application
-
-d) les dossiers **font** et **webfonts** contiennent les polices d'écriture pour le site.
-
-**Note**: cette configuration a été inspirée par rapport à mon utilisation personnelle lors de l'initialisation d'un projet.
-
-# 5. Lancement de l'application
+# 3. Lancement de l'application
 
 Avant de lancer le serveur pour la première fois, il faut lancer les migrations, créer un premier superutilisateur et lancer le serveur:
 
@@ -180,7 +73,7 @@ py manage.py compilemessages
 py manage.py runserver
 ```
 
-# 6. API Django
+# 4. API Django
 
 Pour pouvoir utiliser la librairie permettant de manipuler des librairies, il faut installer `djangorestframework`:
 
@@ -199,7 +92,7 @@ INSTALLED_APPS = [
 ]
 ```
 
-# 7. Application Note
+# 5. Application Note
 
 Il faut créer l'application _note_ avec la commande suivante:
 
@@ -209,7 +102,7 @@ django-admin startapp note
 
 **Note**: n'oubliez pas d'enregistrer l'application dans les **INSTALLED_APPS** et dans le fichier _urls.py_ de l'app _config_
 
-## 7.1 Models
+## 5.1 Models
 
 Une fois la première configuration faite, nous pouvons désormais créer notre modèle, pour cela j'ai utilisé le modèle fourni dans la donné que je copie ici:
 
@@ -230,7 +123,7 @@ python manage.py createsuperuser
 
 A ce stade, la base de données contient la table Note.
 
-## 7.2 Serializers
+## 5.2 Serializers
 
 Afin de pouvoir communiquer avec l'API, nous allons devoir utiliser des _Serializers_, qui permettra de convertir le modèle _Note_ dans du _json_.
 
@@ -245,7 +138,7 @@ class NoteSerializer(serializers.ModelSerializer):
 
 **Note**: le champ _created_at est ignoré ici et c'est bien voulu étant donné la propriété _auto_add_now définie dans le model. Cette propriété fera en sorte qu'à la création d'un objet Note, la date actuelle sera prise en compte. Cependant, on doit mettre updated_at pour que celle-ci se mette à jour lors de manipulations (notamment lors des mises à jour)
 
-# 7.3 Views
+## 5.3 Views
 
 Une fois le modèle et le serializer créé, on peut créer la vue qui va nous permettre d'intéragir avec l'API. Etant donné que nous sommes dans un cas standard, nous allons profiter de la puissance de DRF et utiliser les ModelViewSet, qui contient la logique déjà implémentée pour les CRUD.
 
@@ -257,7 +150,7 @@ class NoteViewSet(viewsets.ModelViewSet):
 
 **Note**: les imports ne sont pas pris en compte dans les différents bouts de code intégrés dans la documentation.
 
-## 7.4 Routes
+## 5.4 Routes
 
 Tout à la fin, nous pouvons nous attaquer aux routes avec un seul endpoint. Pour cela, dans le fichier _urls.py_:
 
@@ -270,13 +163,13 @@ urlpatterns = [
 ]
 ```
 
-## 7.5 Comment lancer les requêtes
+## 5.5 Comment lancer les requêtes
 
 Un fichier **examples.sh** se situe à l'intérieur de l'app _note_ qui contient les différentes requêtes CURL avec quelques exemples d'utilisation.
 
 **Note**: pour pouvoir tester en local, il vous faudra lancer le serveur en 127.0.0.1:8000 avec un `python manage.py runserver` et ensuite ouvrir un nouveau terminal et copier les différentes requêtes CURL présentes dans le fichier **examples.sh**
 
-## 7.6 Tests unitaires
+## 5.6 Tests unitaires
 
 Nous allons profiter du fait que l'application _note_ contient déjà un module _tests.py_ pour y insérer nos tests unitaires.
 
