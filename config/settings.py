@@ -50,6 +50,7 @@ INSTALLED_APPS = [
 
 
     'base',
+    'note',
     'rest_framework',
 ]
 
