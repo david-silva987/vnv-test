@@ -1,4 +1,5 @@
 # README for this test
+
 # Documentation
 
 ## 1. Créer depôt Github
@@ -196,4 +197,105 @@ INSTALLED_APPS = [
     ...
     'rest_framework',
 ]
+```
+
+# 7. Application Note
+
+Il faut créer l'application _note_ avec la commande suivante:
+
+```python
+django-admin startapp note
+```
+
+**Note**: n'oubliez pas d'enregistrer l'application dans les **INSTALLED_APPS** et dans le fichier _urls.py_ de l'app _config_
+
+## 7.1 Models
+
+Une fois la première configuration faite, nous pouvons désormais créer notre modèle, pour cela j'ai utilisé le modèle fourni dans la donné que je copie ici:
+
+```python
+class Note(models.Model):
+    title = models.CharField(max_length=100)
+    content = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+```
+
+On peut désormais créer la migration et l'appliquer avec les deux commandes suivantes:
+
+```python
+python manage.py makemigrations
+python manage.py createsuperuser
+```
+
+A ce stade, la base de données contient la table Note.
+
+## 7.2 Serializers
+
+Afin de pouvoir communiquer avec l'API, nous allons devoir utiliser des _Serializers_, qui permettra de convertir le modèle _Note_ dans du _json_.
+
+Pour cela il faut créer un fichier _serializers.py_ dans l'application _note_ et y mettre le code suivant:
+
+```python
+class NoteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Note
+        fields = ('title', 'content', 'updated_at')
+```
+
+**Note**: le champ _created_at est ignoré ici et c'est bien voulu étant donné la propriété _auto_add_now définie dans le model. Cette propriété fera en sorte qu'à la création d'un objet Note, la date actuelle sera prise en compte. Cependant, on doit mettre updated_at pour que celle-ci se mette à jour lors de manipulations (notamment lors des mises à jour)
+
+# 7.3 Views
+
+Une fois le modèle et le serializer créé, on peut créer la vue qui va nous permettre d'intéragir avec l'API. Etant donné que nous sommes dans un cas standard, nous allons profiter de la puissance de DRF et utiliser les ModelViewSet, qui contient la logique déjà implémentée pour les CRUD.
+
+```python
+class NoteViewSet(viewsets.ModelViewSet):
+    queryset = Note.objects.all()
+    serializer_class = NoteSerializer
+```
+
+**Note**: les imports ne sont pas pris en compte dans les différents bouts de code intégrés dans la documentation.
+
+## 7.4 Routes
+
+Tout à la fin, nous pouvons nous attaquer aux routes avec un seul endpoint. Pour cela, dans le fichier _urls.py_:
+
+```python
+router = DefaultRouter()
+router.register(r'notes', views.NoteViewSet)
+
+urlpatterns = [
+    path('', include(router.urls)),
+]
+```
+
+## 7.5 Comment lancer les requêtes
+
+Un fichier **examples.sh** se situe à l'intérieur de l'app _note_ qui contient les différentes requêtes CURL avec quelques exemples d'utilisation.
+
+**Note**: pour pouvoir tester en local, il vous faudra lancer le serveur en 127.0.0.1:8000 avec un `python manage.py runserver` et ensuite ouvrir un nouveau terminal et copier les différentes requêtes CURL présentes dans le fichier **examples.sh**
+
+## 7.6 Tests unitaires
+
+Nous allons profiter du fait que l'application _note_ contient déjà un module _tests.py_ pour y insérer nos tests unitaires.
+
+Quelques remarques:
+
+- Nous créons un premier jeu de données avec la méthode _setUp()_ 
+
+- 4 tests unitaires ont été créés:
+  
+  - Compter le nombre de Notes
+  
+  - Vérifier mise à jour d'une note
+  
+  - Vérifier suppresion d'une Note
+  
+  - Vérifier mise à jour du champ update_at
+
+Pour lancer les tests unitaires, il suffit de lancer la commande:
+
+```python
+python manage.py test note
 ```
