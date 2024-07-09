@@ -1,6 +1,16 @@
-# README for this test
+# README
+# Initialisation du projet chez vous
 
-# Documentation
+Lancer les commandes suivantes pour initialiser le projet:
+```python
+py -m venv venv
+source venv/Scripts/activate
+pip install -r requirements.txt
+python manage.py migrate
+python manage.py createsuperuser
+python manage.py runserver
+```
+# Documentation du projet
 
 ## 1. Créer depôt Github
 
@@ -175,16 +185,16 @@ Nous allons profiter du fait que l'application _note_ contient déjà un module 
 
 Quelques remarques:
 
-- Nous créons un premier jeu de données avec la méthode _setUp()_ 
+- Nous créons un premier jeu de données avec la méthode _setUp()_
 
 - 4 tests unitaires ont été créés:
-  
+
   - Compter le nombre de Notes
-  
+
   - Vérifier mise à jour d'une note
-  
+
   - Vérifier suppresion d'une Note
-  
+
   - Vérifier mise à jour du champ update_at
 
 Pour lancer les tests unitaires, il suffit de lancer la commande:
