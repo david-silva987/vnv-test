@@ -49,7 +49,6 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
 
-    'base',
     'note',
     'rest_framework',
 ]
@@ -78,7 +77,6 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'config.context_processors.app_info',
             ],
         },
     },
@@ -141,9 +139,6 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
-STATICFILES_DIRS = (
-   BASE_DIR / 'static', # all generic static files are in /static
-)
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATIC_DEV_ROOT = BASE_DIR / 'static'
 
